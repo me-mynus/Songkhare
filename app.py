@@ -18,7 +18,7 @@ app = Flask(__name__)
 
 df = pd.read_csv('filtered_spotify_data.csv')
 
-lg_model = pickle.load(open("model_data/lg_model.pkl", "rb"))
+svm_model = pickle.load(open("model_data/svc_model.pkl", "rb"))
 label_encoder = pickle.load(open("model_data/label_encoder.pkl", "rb"))
 tfid_vectorizer = pickle.load(open("model_data/tf_vectorizer.pkl", "rb"))
 
@@ -81,23 +81,25 @@ def recommend_songs_by_emotion(emotion):
     target_valence = emotions_dict[emotion]
     closest_songs = []
     seen_songs = set()
-    threshold = 0.05
+    threshold = 0.01
     
     for idx, row in df.iterrows():
         valence = row['valence']
         song_name = row['track_name']
+        artists = row['artists']
+        album_name = row['album_name']
         
         difference = abs(valence - target_valence)
         
         if difference <= threshold and song_name not in seen_songs:
-            closest_songs.append((idx, song_name, valence, difference))
+            closest_songs.append((idx, song_name, valence, difference, artists, album_name))
             seen_songs.add(song_name)
   
     closest_songs.sort(key=lambda x: x[3])
     
     random.shuffle(closest_songs)
     
-    closest_songs = closest_songs[:10]
+    closest_songs = closest_songs[:7]
     
     return closest_songs
 
@@ -115,7 +117,7 @@ def index():
 @app.route('/search', methods=['POST'])
 def search():
     user_input = request.form['query']
-    emotion = predict_emotion(user_input, lg_model, tfid_vectorizer, label_encoder)
+    emotion = predict_emotion(user_input, svm_model, tfid_vectorizer, label_encoder)
     
     print(f"Predicted Emotion: {emotion}")
     
@@ -130,7 +132,9 @@ def search():
                 tracks.append({
                     'name': song_info[1],
                     'valence': song_info[2],
-                    'preview_url': preview_url
+                    'preview_url': preview_url,
+                    'artists': song_info[4],
+                    'album_name': song_info[5]
                 })
 
     return render_template('index.html', tracks=tracks, emotion=emotion)

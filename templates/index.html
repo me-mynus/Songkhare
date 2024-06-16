@@ -7,17 +7,22 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
-    <div class="container">
-        <h1>Music System</h1>
-        <div class="search-form">
-            <form action="/search" method="post">
-                <input type="text" name="query" placeholder="Enter your text" required>
-                <button type="submit">Search</button>
-            </form>
-        </div>
+    <div id="container" class="container {% if emotion %}with-results{% endif %}">
+        {% if not emotion %}
+            <h1>How are you feeling?</h1>
+            <div class="search-form">
+                <form action="/search" method="post">
+                    <input type="text" name="query" placeholder="Enter your feelings" required>
+                    <button type="submit">Search</button>
+                </form>
+            </div>
+        {% endif %}
         {% if emotion %}
             <div class="emotion">
-                <h2>Predicted Emotion: {{ emotion }}</h2>
+                <h2>Predicted Emotion: <span style="color: yellow;">{{ emotion }}</span></h2>
+            </div>
+            <div class="recommended">
+                <h2>Recommended songs based on your mood:</h2>
             </div>
         {% endif %}
         {% if error %}
@@ -27,10 +32,10 @@
         {% endif %}
         {% if tracks is not none %}
             <div class="results">
-                <h2>Results:</h2>
                 {% for track in tracks %}
                     <div class="track">
-                        <p>{{ track.name }} (Valence: {{ track.valence }})</p>
+                        <p>{{ track.name }} <span class="artists">by {{ track.artists }}</span></p>
+                        <div class="album_div">Album: <span class="album">{{ track.album_name }}</span></div>
                         {% if track.preview_url %}
                             <audio controls>
                                 <source src="{{ track.preview_url }}" type="audio/mpeg">
@@ -42,11 +47,14 @@
                     </div>
                 {% endfor %}
             </div>
-        {% else %}
-            <div class="no-results">
-                <p>No tracks found. Please try a different emotion.</p>
-            </div>
         {% endif %}
     </div>
+    <script>
+        window.onload = function() {
+            {% if tracks is not none %}
+                document.getElementById('container').classList.add('with-results');
+            {% endif %}
+        }
+    </script>
 </body>
 </html>

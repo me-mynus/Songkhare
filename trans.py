@@ -1,4 +1,3 @@
-# Transformers -> encoders and decoders
 from transformers import (
     AutoTokenizer,
     AutoModel,
@@ -18,7 +17,7 @@ classes = ["sadness", "joy", "love", "anger", "fear", "surprise"]
 train = pd.read_json("data/transform/train.jsonl", lines=True)
 valid = pd.read_json("data/transform/validation.jsonl", lines=True)
 
-# lambda function maps the label indexes with the classes array
+
 train["label_name"] = train["label"].apply(lambda x: classes[x])
 valid["label_name"] = valid["label"].apply(lambda x: classes[x])
 
