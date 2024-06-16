@@ -37,15 +37,29 @@ def data_clean_lemm(text):
 
 
 def text_cleaning_lstm(df, column, vocab_size, max_length):
-    stemmer = PorterStemmer()
+    wnl = WordNetLemmatizer()
     corpus = []  # Store preprocessed text for encoding
     for text in df[column]:
         text = re.sub("[^a-zA-Z]", " ", text)
         text = text.lower()
-        text = text.split()
-        text = [stemmer.stem(word) for word in text if word not in stopwords]
-        text = " ".join(text)
-        corpus.append(text)
+        words = word_tokenize(text)
+        words = [wnl.lemmatize(word) for word in words if word not in stopwords]
+        cleaned_text = " ".join(words).strip()
+        corpus.append(cleaned_text)
     one_hot_rep = [one_hot(input_text=word, n=vocab_size) for word in corpus]
     pad = pad_sequences(sequences=one_hot_rep, maxlen=max_length, padding="pre")
+    return pad
+
+
+def predict_emotion_lstm(input):
+    wnl = WordNetLemmatizer()
+    corpus = []
+    text = re.sub("[^a-zA-Z]", " ", input)
+    text = text.lower()
+    words = word_tokenize(text)
+    words = [wnl.lemmatize(word) for word in words if word not in stopwords]
+    cleaned_text = " ".join(words).strip()
+    corpus.append(cleaned_text)
+    one_hot_rep = [one_hot(input_text=word, n=11000) for word in corpus]
+    pad = pad_sequences(sequences=one_hot_rep, maxlen=300, padding="pre")
     return pad

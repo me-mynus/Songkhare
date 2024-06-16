@@ -1,18 +1,35 @@
-# import numpy as np
+import numpy as np
+import pandas as pd
 
-# from keras.models import Sequential
-# from keras.layers import Embedding, LSTM, Dense, Dropout
-# from keras.preprocessing.text import one_hot
-# from keras.callbacks import EarlyStopping
-# from keras.preprocessing.sequence import pad_sequences
-# from keras.utils import to_categorical
-# from keras.models import load_model
+from keras.models import Sequential
+from keras.layers import Embedding, LSTM, Dense, Dropout
+from keras.preprocessing.text import one_hot
+from keras.callbacks import EarlyStopping
+from keras.preprocessing.sequence import pad_sequences
+from keras.utils import to_categorical
+from keras.models import load_model
 
-# from preprocess import text_cleaning_lstm
+from sklearn.preprocessing import LabelEncoder
+from preprocess import text_cleaning_lstm, predict_emotion_lstm
 
-# x_train_lstm = text_cleaning_lstm(train_df, "text", 11000, 300)
-# y_train_lstm = to_categorical(train_df["sentiment"])
+classes = ["sadness", "joy", "love", "anger", "fear", "surprise"]
 
+
+train = pd.read_json("data/data.jsonl", lines=True)
+train["label_name"] = train["label"].apply(lambda x: classes[x])
+train = train.drop("label", axis=1)
+train["length"] = [len(x) for x in train.text]
+
+test = pd.read_json("data/test.jsonl", lines=True)
+test["label_name"] = test["label"].apply(lambda x: classes[x])
+
+lb = LabelEncoder()
+train["label_name"] = lb.fit_transform(train["label_name"])
+test["label_name"] = lb.fit_transform(test["label_name"])
+
+print(train.head())
+x_train_lstm = text_cleaning_lstm(train, "text", 11000, 300)
+y_train_lstm = to_categorical(train["label_name"])
 
 # def model_train(x, y):
 #     model = Sequential()
@@ -37,28 +54,13 @@
 #         batch_size=32,
 #         callbacks=[callback],
 #     )
-#     model.save("model_data/lstm_model_2.h5")
+#     model.save("model_data/lstm_model_heavy.h5")
 #     return model
 
 
 # model = model_train(x_train_lstm, y_train_lstm)
 
 # model = load_model("model_data/lstm_model_2.h5")
-
-
-# def predict_emotion_lstm(input):
-#     stemmer = PorterStemmer()
-#     corpus = []
-#     text = re.sub("[^a-zA-Z]", " ", input)
-#     text = text.lower()
-#     text = text.split()
-#     # List comprehension
-#     text = [stemmer.stem(word) for word in text if word not in stopwords]
-#     text = " ".join(text)
-#     corpus.append(text)
-#     one_hot_rep = [one_hot(input_text=word, n=11000) for word in corpus]
-#     pad = pad_sequences(sequences=one_hot_rep, maxlen=300, padding="pre")
-#     return pad
 
 
 # def test_model_lstm(input):
