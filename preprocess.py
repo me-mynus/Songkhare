@@ -4,8 +4,8 @@ from nltk.stem import PorterStemmer, WordNetLemmatizer
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 
-from keras.preprocessing.sequence import pad_sequences
-from keras.preprocessing.text import one_hot
+from tensorflow.keras.preprocessing.sequence import pad_sequences
+from tensorflow.keras.preprocessing.text import one_hot
 
 nltk.download("stopwords")
 nltk.download("wordnet")

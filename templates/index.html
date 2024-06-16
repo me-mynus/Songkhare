@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Music System</h1>
+        <div class="search-form">
+            <form action="/search" method="post">
+                <input type="text" name="query" placeholder="Enter your text" required>
+                <button type="submit">Search</button>
+            </form>
+        </div>
+        {% if emotion %}
+            <div class="emotion">
+                <h2>Predicted Emotion: {{ emotion }}</h2>
+            </div>
+        {% endif %}
+        {% if error %}
+            <div class="error">
+                <p>{{ error }}</p>
+            </div>
+        {% endif %}
+        {% if tracks is not none %}
+            <div class="results">
+                <h2>Results:</h2>
+                {% for track in tracks %}
+                    <div class="track">
+                        <p>{{ track.name }} (Valence: {{ track.valence }})</p>
+                        {% if track.preview_url %}
+                            <audio controls>
+                                <source src="{{ track.preview_url }}" type="audio/mpeg">
+                                Your browser does not support the audio element.
+                            </audio>
+                        {% else %}
+                            <p>No preview available</p>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="no-results">
+                <p>No tracks found. Please try a different emotion.</p>
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>
