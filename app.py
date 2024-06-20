@@ -23,13 +23,15 @@ label_encoder = pickle.load(open("model_data/label_encoder.pkl", "rb"))
 tfid_vectorizer = pickle.load(open("model_data/tf_vectorizer.pkl", "rb"))
 
 emotions_dict = {
-    "sadness": 0.4,
+    "sadness": 0.1,
     "joy": 0.9,
-    "love": 0.6,
-    "anger": 0.2,
+    "anger": 0.3,
     "fear": 0.2,
-    "surprise": 0.7,
+    "surprise": 0.5,
+    "love": 0.8
 }
+
+
 
 def get_token():
     auth_string = client_id + ":" + client_secret
@@ -77,31 +79,39 @@ def get_track_preview_url(token, track_name):
 def recommend_songs_by_emotion(emotion):
     if emotion not in emotions_dict:
         return []
-    
+
     target_valence = emotions_dict[emotion]
     closest_songs = []
     seen_songs = set()
-    threshold = 0.01
-    
-    for idx, row in df.iterrows():
-        valence = row['valence']
-        song_name = row['track_name']
-        artists = row['artists']
-        album_name = row['album_name']
-        
-        difference = abs(valence - target_valence)
-        
-        if difference <= threshold and song_name not in seen_songs:
-            closest_songs.append((idx, song_name, valence, difference, artists, album_name))
-            seen_songs.add(song_name)
-  
+    initial_threshold = 0.05
+    max_threshold = 0.2
+    step = 0.01
+
+    threshold = initial_threshold
+
+    while len(closest_songs) < 5 and threshold <= max_threshold:
+        for idx, row in df.iterrows():
+            valence = row['valence']
+            song_name = row['track_name']
+            artists = row['artists']
+            album_name = row['album_name']
+
+            difference = abs(valence - target_valence)
+
+            if difference <= threshold and song_name not in seen_songs:
+                closest_songs.append((idx, song_name, valence, difference, artists, album_name))
+                seen_songs.add(song_name)
+
+        threshold += step
+
     closest_songs.sort(key=lambda x: x[3])
-    
+
     random.shuffle(closest_songs)
-    
-    closest_songs = closest_songs[:7]
-    
+
+    closest_songs = closest_songs[:6]
+
     return closest_songs
+
 
 def predict_emotion(text, model, vectorizer, label_encoder):
     clean_text = data_clean_lemm(text)

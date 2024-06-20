@@ -28,7 +28,6 @@ test = pd.read_json("data/test.jsonl", lines=True)
 test["label_name"] = test["label"].apply(lambda x: classes[x])
 
 
-# Preprocessing
 
 lb = LabelEncoder()
 train["label_name"] = lb.fit_transform(train["label_name"])
